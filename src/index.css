@@ -1,2 +1,28 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+.ps-sidebar-container {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.ps-sidebar-backdrop {
+  background: transparent !important;
+  backdrop-filter: none !important;
+}
+
+::-webkit-scrollbar {
+    display: none;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+
+scrollable-container {
+  overflow-y: scroll; 
+  
+ 
+
+  scrollbar-width: none; 
+}
