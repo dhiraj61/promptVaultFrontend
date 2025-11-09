@@ -1,7 +1,8 @@
-import { RiMenu3Line, RiMenuLine, RiMoonClearFill, RiMoonClearLine, RiSunFill, RiSunLine } from '@remixicon/react';
+import { RiMenuLine, RiSunFill, RiSunLine } from '@remixicon/react';
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { Sidebar, Menu, MenuItem } from 'react-pro-sidebar';
-import { Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 const SidebarMenu = () => {
     const [toggled, setToggled] = useState(false);
@@ -12,6 +13,13 @@ const SidebarMenu = () => {
         localStorage.setItem('theme', darkMode ? 'dark' : 'light');
     }, [darkMode]);
 
+    const logoutHandler = async () => {
+        const logout = await axios.post('http://localhost:3000/api/auth/logout', {}, { withCredentials: true })
+        if (logout) {
+            window.location.href = '/login'
+        }
+    }
+
     return (
         <div className='flex w-full bg-gray-900 text-white dark:bg-white  dark:text-black transition-colors duration-300'>
             <Sidebar className='bg-white text-black dark:bg-gray-700 dark:text-blue-300' onBackdropClick={() => setToggled(false)} toggled={toggled} breakPoint="all">
@@ -20,7 +28,7 @@ const SidebarMenu = () => {
                     <MenuItem component={<Link to="/" />}>Community</MenuItem>
                     <MenuItem component={<Link to="/createPrompt" />}>Create Prompt</MenuItem>
                     <MenuItem component={<Link to="/likedPrompt" />}>Liked Prompt</MenuItem>
-                    <MenuItem>Logout</MenuItem>
+                    <MenuItem onClick={logoutHandler}>Logout</MenuItem>
                 </Menu>
             </Sidebar>
             <div className="flex-1 min-w-0 h-full flex flex-col overflow-hidden">

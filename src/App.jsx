@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react"
+import { Routes,Route } from "react-router-dom"
 import SidebarMenu from "./components/SidebarMenu"
 import AppRoutes from "./routes/AppRoutes"
 import axios from "axios"
 import Login from "./pages/Login"
+import Register from "./pages/Register"
 
 function App() {
   const [userData, setUserData] = useState(null)
@@ -27,16 +29,23 @@ function App() {
   }
   return (
     <>
-      {
-        userData ? (
-          <>
-            <SidebarMenu />
-            <AppRoutes />
-          </>
-        ) : (
-          <Login />
-        )
-      }
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/*"
+          element={
+            userData ? (
+              <>
+                <SidebarMenu />
+                <AppRoutes />
+              </>
+            ) : (
+              <Login />
+            )
+          }
+        />
+      </Routes>
     </>
   )
 }

@@ -1,23 +1,38 @@
 import { useEffect, useState } from "react";
 import axios from 'axios'
+import { RiHeartFill, RiHeartLine } from "@remixicon/react";
+import { toast } from "react-toastify";
 
 const Profile = () => {
   const [prompt, setPrompt] = useState([])
   const [loading, setLoading] = useState(true)
-  const [user,setUser] = useState('')
-  const [likes,setLikes] = useState('')
+  const [user, setUser] = useState(null)
+  const [likes, setLikes] = useState(0)
   const [expandedPromptId, setExpandedPromptId] = useState(null);
+  const [isLike, setIsLike] = useState({})
+  const [likeCount, setLikeCount] = useState({})
 
   useEffect(() => {
     async function fetchData() {
       try {
         const res = await axios.get('http://localhost:3000/api/post/userPrompt', { withCredentials: true })
-        const like = await axios.get('http://localhost:3000/api/totalLike',{withCredentials:true})
+        const totallike = await axios.get('http://localhost:3000/api/totalLike', { withCredentials: true })
+        const allPrompts = res.data.data
+        const likeResult = {};
+        const promptLike = {}
+        for (const p of allPrompts) {
+          const likesRes = await axios.get(`http://localhost:3000/api/fetchLike/${p._id}`, { withCredentials: true })
+          likeResult[p._id] = likesRes.data.like
+          const promptLikeCount = await axios.get(`http://localhost:3000/api/promptLike/${p._id}`, { withCredentials: true })
+          promptLike[p._id] = promptLikeCount.data.likeCount
+        }
         setPrompt(res.data.data || [])
         setUser(res.data.user)
-        setLikes(like.data.likeCount)
+        setLikes(totallike.data.likeCount)
+        setIsLike(likeResult)
+        setLikeCount(promptLike)
       } catch (error) {
-        console.log('User Not logged in', error)
+        toast.error('404 Not Found', error)
         setPrompt([])
       } finally {
         setLoading(false)
@@ -29,16 +44,47 @@ const Profile = () => {
   if (loading) {
     return <p className="text-center mt-10">Checking session...</p>;
   }
+
+  const likeHandler = async (id) => {
+    try {
+      const like = await axios.post(`http://localhost:3000/api/like/${id}`, {}, { withCredentials: true })
+      setIsLike(prev => ({ ...prev, [id]: true }));
+      if (like.data?.likeCount !== undefined) {
+        setLikeCount(prev => ({ ...prev, [id]: like.data.likeCount }));
+      } else {
+        setLikeCount(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+      }
+      setLikes(prev => prev + 1);
+    } catch (error) {
+      toast.error(error)
+    }
+  }
+
+  const disLikeHandler = async (id) => {
+    try {
+      const like = await axios.delete(`http://localhost:3000/api/dislike/${id}`, { withCredentials: true })
+      setIsLike(prev => ({ ...prev, [id]: false }));
+      if (like.data?.likeCount !== undefined) {
+        setLikeCount(prev => ({ ...prev, [id]: like.data.likeCount }));
+      } else {
+        setLikeCount(prev => ({ ...prev, [id]: Math.max((prev[id] || 1) - 1, 0) }));
+      }
+      setLikes(prev => Math.max(prev - 1, 0));
+    } catch (error) {
+      toast.error(error)
+    }
+  }
+
   return (
     <div className="w-full h-full p-4 flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
       <div className="w-full bg-gray-50 dark:bg-gray-900 flex flex-row p-2 gap-4 shadow dark:shadow-white rounded-2xl shrink-0">
         <img
-          src={user.avatar}
+          src={user?.avatar}
           alt="avatar"
           className="h-20 w-20 rounded-[5rem]"
         />
         <div className="flex flex-col font-medium justify-center">
-          <h1>{user.name}</h1>
+          <h1>{user?.name}</h1>
           <div className="flex flex-row gap-4">
             <div className="flex flex-col">
               <h1 className="mb-[-0.3rem]">{prompt.length}</h1>
@@ -68,9 +114,17 @@ const Profile = () => {
                   </button>
                 )
                 }
-                <p className="text-sm"><b>Tags:</b> {prompt.tags.map((tag,indx)=>{return indx+1 + '.' + ' '+tag+' '})}</p>
+                <p className="text-sm"><b>Tags:</b> {prompt.tags.map((tag, indx) => { return indx + 1 + '.' + ' ' + tag + ' ' })}</p>
                 {prompt.isPrivate ? (<p className="text-sm font-bold text-red-400">Private</p>) : (<p className="text-sm font-bold text-green-400">Public</p>)}
-              </div>)
+                <hr className="w-full" />
+                <div className="flex flex-row items-center gap-2">
+                  {
+                    isLike[prompt._id] ? (<button onClick={() => { disLikeHandler(prompt._id) }}><RiHeartFill className="text-red-400" /></button>) : (<button onClick={() => { likeHandler(prompt._id) }}><RiHeartLine /></button>)
+                  }
+                  <p>{likeCount[prompt._id]}</p>
+                </div>
+              </div>
+              )
             }))
 
           }
@@ -82,11 +136,3 @@ const Profile = () => {
 
 export default Profile;
 
-/*
-{shouldTrucate && (
-                <button onClick={() => setExpanded(!expanded)} className="mt-2 text-blue-500 hover:underline font-medium align-super">
-                  {expanded ? 'See less' : "See more"}
-                </button>
-              )
-            }
-*/
