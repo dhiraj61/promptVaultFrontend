@@ -1,45 +1,59 @@
 import { useEffect, useState } from "react";
-import axios from 'axios'
+import axios from "axios";
 import { RiHeartFill, RiHeartLine } from "@remixicon/react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
-  const [prompt, setPrompt] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState(null)
-  const [likes, setLikes] = useState(0)
+  const [prompt, setPrompt] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [likes, setLikes] = useState(0);
   const [expandedPromptId, setExpandedPromptId] = useState(null);
-  const [isLike, setIsLike] = useState({})
-  const [likeCount, setLikeCount] = useState({})
+  const [isLike, setIsLike] = useState({});
+  const [likeCount, setLikeCount] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await axios.get('http://localhost:3000/api/post/userPrompt', { withCredentials: true })
-        const totallike = await axios.get('http://localhost:3000/api/totalLike', { withCredentials: true })
-        const allPrompts = res.data.data
+        const res = await axios.get(
+          "http://localhost:3000/api/post/userPrompt",
+          { withCredentials: true }
+        );
+        const totallike = await axios.get(
+          "http://localhost:3000/api/totalLike",
+          { withCredentials: true }
+        );
+        const allPrompts = res.data.data;
         const likeResult = {};
-        const promptLike = {}
+        const promptLike = {};
         for (const p of allPrompts) {
-          const likesRes = await axios.get(`http://localhost:3000/api/fetchLike/${p._id}`, { withCredentials: true })
-          likeResult[p._id] = likesRes.data.like
-          const promptLikeCount = await axios.get(`http://localhost:3000/api/promptLike/${p._id}`, { withCredentials: true })
-          promptLike[p._id] = promptLikeCount.data.likeCount
+          const likesRes = await axios.get(
+            `http://localhost:3000/api/fetchLike/${p._id}`,
+            { withCredentials: true }
+          );
+          likeResult[p._id] = likesRes.data.like;
+          const promptLikeCount = await axios.get(
+            `http://localhost:3000/api/promptLike/${p._id}`,
+            { withCredentials: true }
+          );
+          promptLike[p._id] = promptLikeCount.data.likeCount;
         }
-        setPrompt(res.data.data || [])
-        setUser(res.data.user)
-        setLikes(totallike.data.likeCount)
-        setIsLike(likeResult)
-        setLikeCount(promptLike)
+        setPrompt(res.data.data || []);
+        setUser(res.data.user);
+        setLikes(totallike.data.likeCount);
+        setIsLike(likeResult);
+        setLikeCount(promptLike);
       } catch (error) {
-        toast.error('404 Not Found', error)
-        setPrompt([])
+        toast.error("404 Not Found", error);
+        setPrompt([]);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
-    fetchData()
-  }, [])
+    fetchData();
+  }, []);
 
   if (loading) {
     return <p className="text-center mt-10">Checking session...</p>;
@@ -47,33 +61,43 @@ const Profile = () => {
 
   const likeHandler = async (id) => {
     try {
-      const like = await axios.post(`http://localhost:3000/api/like/${id}`, {}, { withCredentials: true })
-      setIsLike(prev => ({ ...prev, [id]: true }));
+      const like = await axios.post(
+        `http://localhost:3000/api/like/${id}`,
+        {},
+        { withCredentials: true }
+      );
+      setIsLike((prev) => ({ ...prev, [id]: true }));
       if (like.data?.likeCount !== undefined) {
-        setLikeCount(prev => ({ ...prev, [id]: like.data.likeCount }));
+        setLikeCount((prev) => ({ ...prev, [id]: like.data.likeCount }));
       } else {
-        setLikeCount(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+        setLikeCount((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
       }
-      setLikes(prev => prev + 1);
+      setLikes((prev) => prev + 1);
     } catch (error) {
-      toast.error(error)
+      toast.error(error);
     }
-  }
+  };
 
   const disLikeHandler = async (id) => {
     try {
-      const like = await axios.delete(`http://localhost:3000/api/dislike/${id}`, { withCredentials: true })
-      setIsLike(prev => ({ ...prev, [id]: false }));
+      const like = await axios.delete(
+        `http://localhost:3000/api/dislike/${id}`,
+        { withCredentials: true }
+      );
+      setIsLike((prev) => ({ ...prev, [id]: false }));
       if (like.data?.likeCount !== undefined) {
-        setLikeCount(prev => ({ ...prev, [id]: like.data.likeCount }));
+        setLikeCount((prev) => ({ ...prev, [id]: like.data.likeCount }));
       } else {
-        setLikeCount(prev => ({ ...prev, [id]: Math.max((prev[id] || 1) - 1, 0) }));
+        setLikeCount((prev) => ({
+          ...prev,
+          [id]: Math.max((prev[id] || 1) - 1, 0),
+        }));
       }
-      setLikes(prev => Math.max(prev - 1, 0));
+      setLikes((prev) => Math.max(prev - 1, 0));
     } catch (error) {
-      toast.error(error)
+      toast.error(error);
     }
-  }
+  };
 
   return (
     <div className="w-full h-full p-4 flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
@@ -101,38 +125,89 @@ const Profile = () => {
         <h1 className="text-xl font-medium ">Prompts</h1>
         <hr className="w-full" />
         <div className="w-full h-[80vh] p-4 flex flex-col gap-4 overflow-y-auto">
-          {
-            prompt.length === 0 ? (<p className="text-center text-gray-500">No prompts yet.</p>) : (prompt.map((prompt) => {
-              const shouldTrucate = prompt.prompt.length > 100
-              const expanded = expandedPromptId === prompt._id
-              const displayText = expanded ? prompt.prompt : prompt.prompt.slice(0, 100) + (shouldTrucate ? '...' : '')
-              return (<div key={prompt._id} className="w-full flex flex-col gap-2 p-4 bg-transparent border rounded items-start">
-                <p className="text-sm font-normal "><b>Prompt:</b> {displayText}</p>
-                {shouldTrucate && (
-                  <button onClick={() => setExpandedPromptId(expanded ? null : prompt._id)} className="text-blue-500 font-medium align-super">
-                    {expanded ? 'See less' : "See more"}
-                  </button>
-                )
-                }
-                <p className="text-sm"><b>Tags:</b> {prompt.tags.map((tag, indx) => { return indx + 1 + '.' + ' ' + tag + ' ' })}</p>
-                {prompt.isPrivate ? (<p className="text-sm font-bold text-red-400">Private</p>) : (<p className="text-sm font-bold text-green-400">Public</p>)}
-                <hr className="w-full" />
-                <div className="flex flex-row items-center gap-2">
-                  {
-                    isLike[prompt._id] ? (<button onClick={() => { disLikeHandler(prompt._id) }}><RiHeartFill className="text-red-400" /></button>) : (<button onClick={() => { likeHandler(prompt._id) }}><RiHeartLine /></button>)
+          {prompt.length === 0 ? (
+            <p className="text-center text-gray-500">No prompts yet.</p>
+          ) : (
+            prompt.map((prompt) => {
+              const shouldTrucate = prompt.prompt.length > 100;
+              const expanded = expandedPromptId === prompt._id;
+              const displayText = expanded
+                ? prompt.prompt
+                : prompt.prompt.slice(0, 100) + (shouldTrucate ? "..." : "");
+              return (
+                <div
+                  key={prompt._id}
+                  className="w-full flex flex-col gap-2 p-4 bg-transparent border rounded items-start cursor-pointer"
+                  onClick={() => {
+                    navigate(`/singleprompt/${prompt._id}`, {
+                      state: { prompt },
+                    });
+                  }}
+                >
+                  <h1 className="text-sm font-normal ">
+                    <b>Title: </b>
+                    {prompt.title}
+                  </h1>
+                  <p className="text-sm font-normal ">
+                    <b>Prompt:</b> {displayText}
+                  </p>
+                  {shouldTrucate && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedPromptId(expanded ? null : prompt._id)
+                      }
+                      }
+                      className="text-blue-500 font-medium align-super"
+                    >
+                      {expanded ? "See less" : "See more"}
+                    </button>
+                  )
                   }
-                  <p>{likeCount[prompt._id]}</p>
+                  <p className="text-sm">
+                    <b>Tags:</b>{" "}
+                    {prompt.tags.map((tag, indx) => {
+                      return indx + 1 + "." + " " + tag + " ";
+                    })}
+                  </p>
+                  {
+                    prompt.isPrivate ? (
+                      <p className="text-sm font-bold text-red-400">Private</p>
+                    ) : (
+                      <p className="text-sm font-bold text-green-400">Public</p>
+                    )
+                  }
+                  < hr className="w-full" />
+                  <div className="flex flex-row items-center gap-2">
+                    {isLike[prompt._id] ? (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          disLikeHandler(prompt._id);
+                        }}
+                      >
+                        <RiHeartFill className="text-red-400" />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          likeHandler(prompt._id);
+                        }}
+                      >
+                        <RiHeartLine />
+                      </button>
+                    )}
+                    <p>{likeCount[prompt._id]}</p>
+                  </div>
                 </div>
-              </div>
-              )
-            }))
-
-          }
+              );
+            })
+          )}
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 
 export default Profile;
-
