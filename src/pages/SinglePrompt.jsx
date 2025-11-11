@@ -83,7 +83,7 @@ const SinglePrompt = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white w-full min-h-dvh flex flex-col justify-center items-center gap-4 p-4"
+      className="bg-gray-50 dark:bg-gray-900 text-black dark:text-white w-full min-h-dvh flex flex-col justify-center items-center gap-4 p-4 sm:px-35 md:px-50 lg:px-80 xl:px-120 2xl:px-250"
     >
       <input
         className="w-full h-16 border-b outline-0 p-4"
@@ -118,17 +118,19 @@ const SinglePrompt = () => {
         />
       </div>
 
-      <button className="w-[55vw] p-4 rounded-2xl shadow-2xl text-xl bg-blue-400 dark:border active:scale-95">
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <button className="w-[55vw] sm:w-[24vw] lg:w-[20vw] xl:w-[18vw] 2xl:w-[12vw] p-4 rounded-2xl shadow-2xl text-xl bg-blue-400 dark:border active:scale-95">
         Update Prompt
       </button>
       <button
-        className="w-[55vw] p-4 rounded-2xl shadow-2xl text-xl bg-red-400 dark:border active:scale-95"
+        className="w-[55vw] sm:w-[24vw] lg:w-[20vw] xl:w-[18vw] 2xl:w-[12vw] p-4 rounded-2xl shadow-2xl text-xl bg-red-400 dark:border active:scale-95"
         onClick={() => {
           deleteHandler();
         }}
       >
         Delete Prompt
       </button>
+      </div>
     </form>
   );
 };

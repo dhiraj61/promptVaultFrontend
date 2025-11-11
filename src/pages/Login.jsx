@@ -27,7 +27,7 @@ const Login = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-gray-50 w-full min-h-dvh flex flex-col justify-center items-center gap-4 p-4"
+      className="bg-gray-50 w-full min-h-dvh flex flex-col justify-center items-center gap-4 p-4 sm:px-35 md:px-50 lg:px-80 xl:px-120 2xl:px-250"
     >
       <input
         className="w-full h-16 border-b outline-0 p-4 "
