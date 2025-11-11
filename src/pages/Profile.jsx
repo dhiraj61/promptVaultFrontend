@@ -102,7 +102,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="w-full h-full p-4 sm:px-35 md:px-50 lg:px-80 xl:px-120 2xl:px-250 flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
+    <div className="h-full w-full px-[8vw] sm:px-[18vw] md:px-[25vw] xl:px-[30vw] 2xl:px-[32vw] py-4  flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
       <div className="w-full bg-gray-50 dark:bg-gray-900 flex flex-row px-8 gap-4 justify-center">
         <img
           src={user?.avatar}

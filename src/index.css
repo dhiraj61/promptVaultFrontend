@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 .ps-sidebar-container {
@@ -13,16 +14,12 @@
 }
 
 ::-webkit-scrollbar {
-    display: none;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
+  display: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
-
-scrollable-container {
-  overflow-y: scroll; 
-  
- 
-
-  scrollbar-width: none; 
+.scrollable-container {
+  overflow-y: scroll;
+  scrollbar-width: none;
 }

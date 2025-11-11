@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Routes,Route } from "react-router-dom"
+import { Routes, Route } from "react-router-dom"
 import SidebarMenu from "./components/SidebarMenu"
 import AppRoutes from "./routes/AppRoutes"
 import axios from "axios"
@@ -10,18 +10,19 @@ function App() {
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(null)
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await axios.get('http://localhost:3000/api/post/userPrompt', { withCredentials: true })
-        setUserData(res.data.data)
-      } catch (error) {
-        console.log('User Not logged in', error)
-        setUserData(null)
-      } finally {
-        setLoading(false)
-      }
+  async function fetchData() {
+    try {
+      const res = await axios.get('http://localhost:3000/api/post/userPrompt', { withCredentials: true })
+      setUserData(res.data.data)
+    } catch (error) {
+      console.log('User Not logged in', error)
+      setUserData(null)
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchData()
   }, [])
   if (loading) {

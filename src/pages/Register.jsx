@@ -51,7 +51,7 @@ const Register = () => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="bg-gray-50 w-full min-h-dvh flex flex-col justify-center items-center gap-4 p-4 sm:px-35 md:px-50 lg:px-80 xl:px-120 2xl:px-250"
+      className="bg-gray-50 w-full min-h-dvh flex flex-col justify-center items-center gap-4 px-[8vw] sm:px-[18vw] md:px-[25vw] xl:px-[30vw] 2xl:px-[32vw] py-4"
     >
       <img
         src={preview || "https://via.placeholder.com/100"}
