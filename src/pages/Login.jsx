@@ -1,17 +1,20 @@
 import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate()
+  const api = import.meta.env.VITE_API_URL
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/auth/login",
+        `${api}/auth/login`,
         { email, password },
         { withCredentials: true }
       );
@@ -20,7 +23,7 @@ const Login = () => {
         window.location.href = '/profile'
       }
     } catch (err) {
-      console.error("Login failed:", err.response?.data || err.message);
+      toast.error("Login failed:", err.response?.data || err.message);
     }
   };
 

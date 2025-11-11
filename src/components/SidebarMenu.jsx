@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 const SidebarMenu = () => {
     const [toggled, setToggled] = useState(false);
     const [darkMode, setDarkMode] = useState(() => localStorage.getItem("theme") === "dark");
+    const api = import.meta.env.VITE_API_URL
 
     useEffect(() => {
         document.documentElement.classList.toggle('dark', darkMode);
@@ -14,7 +15,7 @@ const SidebarMenu = () => {
     }, [darkMode]);
 
     const logoutHandler = async () => {
-        const logout = await axios.post('http://localhost:3000/api/auth/logout', {}, { withCredentials: true })
+        const logout = await axios.post(`${api}/auth/logout`, {}, { withCredentials: true })
         if (logout) {
             window.location.href = '/login'
         }

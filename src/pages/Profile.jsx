@@ -13,15 +13,17 @@ const Profile = () => {
   const [isLike, setIsLike] = useState({});
   const [likeCount, setLikeCount] = useState({});
   const navigate = useNavigate();
+  const api = import.meta.env.VITE_API_URL
+
 
   async function fetchData() {
     try {
       const res = await axios.get(
-        "http://localhost:3000/api/post/userPrompt",
+        `${api}/post/userPrompt`,
         { withCredentials: true }
       );
       const totallike = await axios.get(
-        "http://localhost:3000/api/totalLike",
+        `${api}/totalLike`,
         { withCredentials: true }
       );
       const allPrompts = res.data.data;
@@ -29,12 +31,12 @@ const Profile = () => {
       const promptLike = {};
       for (const p of allPrompts) {
         const likesRes = await axios.get(
-          `http://localhost:3000/api/fetchLike/${p._id}`,
+          `${api}/fetchLike/${p._id}`,
           { withCredentials: true }
         );
         likeResult[p._id] = likesRes.data.like;
         const promptLikeCount = await axios.get(
-          `http://localhost:3000/api/promptLike/${p._id}`,
+          `${api}/promptLike/${p._id}`,
           { withCredentials: true }
         );
         promptLike[p._id] = promptLikeCount.data.likeCount;
@@ -64,7 +66,7 @@ const Profile = () => {
   const likeHandler = async (id) => {
     try {
       const like = await axios.post(
-        `http://localhost:3000/api/like/${id}`,
+        `${api}/like/${id}`,
         {},
         { withCredentials: true }
       );
@@ -83,7 +85,7 @@ const Profile = () => {
   const disLikeHandler = async (id) => {
     try {
       const like = await axios.delete(
-        `http://localhost:3000/api/dislike/${id}`,
+        `${api}/dislike/${id}`,
         { withCredentials: true }
       );
       setIsLike((prev) => ({ ...prev, [id]: false }));

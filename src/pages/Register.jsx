@@ -9,6 +9,8 @@ const Register = () => {
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(null);
+  const api = import.meta.env.VITE_API_URL
+
 
   const navigate = useNavigate();
 
@@ -30,7 +32,7 @@ const Register = () => {
       if (avatar) formData.append("avatar", avatar);
 
       const res = await axios.post(
-        "http://localhost:3000/api/auth/register",
+        `${api}/auth/register`,
         formData,
         {
           withCredentials: true,

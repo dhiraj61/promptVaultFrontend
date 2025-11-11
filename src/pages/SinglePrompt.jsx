@@ -11,6 +11,8 @@ const SinglePrompt = () => {
   const { id } = useParams();
   const promptData = location.state?.prompt;
   const navigate = useNavigate()
+  const api = import.meta.env.VITE_API_URL
+
 
   useEffect(() => {
     if (promptData) {
@@ -25,7 +27,7 @@ const SinglePrompt = () => {
   const fetchPrompt = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/post/singlePrompt/${id}`,
+        `${api}/post/singlePrompt/${id}`,
         {
           withCredentials: true,
         }
@@ -43,7 +45,7 @@ const SinglePrompt = () => {
     setLoading(true)
     try {
       const res = await axios.patch(
-        `http://localhost:3000/api/post/updatePrompt/${id}`,
+        `${api}/post/updatePrompt/${id}`,
         { title, prompt, isPrivate },
         {
           withCredentials: true,
@@ -70,15 +72,26 @@ const SinglePrompt = () => {
   }
 
   const deleteHandler = async () => {
-    const deleted = await axios.delete(
-      `http://localhost:3000/api/post/deletePrompt/${id}`,
-      { withCredentials: true }
-    );
-    if (deleted) {
-      toast.error("Deleted Successfully");
-      navigate('/profile')
+    try {
+      setLoading(true)
+      const deleted = await axios.delete(
+        `${api}/post/deletePrompt/${id}`,
+        { withCredentials: true }
+      );
+      if (deleted) {
+        toast.error("Deleted Successfully");
+        navigate('/profile')
+      }
+    } catch (error) {
+      toast.error(error)
+    } finally {
+      setLoading(false)
     }
   };
+
+  if (loading) {
+    return <p className="text-center mt-10">Deleting...</p>;
+  }
 
   return (
     <form

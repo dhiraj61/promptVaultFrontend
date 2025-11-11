@@ -10,11 +10,12 @@ const Community = () => {
   const [expandedPromptId, setExpandedPromptId] = useState(null);
   const [isLike, setIsLike] = useState({});
   const [likeCount, setLikeCount] = useState({});
+  const api = import.meta.env.VITE_API_URL
 
   async function fetchData(query = "") {
     try {
       const res = await axios.get(
-        `http://localhost:3000/api/post/allPrompt?q=${query}`,
+        `${api}/post/allPrompt?q=${query}`,
         { withCredentials: true }
       );
       const allPrompts = res.data.postWithUser;
@@ -22,12 +23,12 @@ const Community = () => {
       const promptLike = {};
       for (const p of allPrompts) {
         const likesRes = await axios.get(
-          `http://localhost:3000/api/fetchLike/${p._id}`,
+          `${api}/fetchLike/${p._id}`,
           { withCredentials: true }
         );
         likeResult[p._id] = likesRes.data.like;
         const promptLikeCount = await axios.get(
-          `http://localhost:3000/api/promptLike/${p._id}`,
+          `${api}/promptLike/${p._id}`,
           { withCredentials: true }
         );
         promptLike[p._id] = promptLikeCount.data.likeCount;
@@ -35,7 +36,6 @@ const Community = () => {
       setPrompt(res.data.postWithUser || []);
       setIsLike(likeResult);
       setLikeCount(promptLike);
-      console.log('hii')
     } catch (error) {
       toast.error("404 Not Found", error);
       setPrompt([]);
@@ -59,7 +59,7 @@ const Community = () => {
   const likeHandler = async (id) => {
     try {
       const like = await axios.post(
-        `http://localhost:3000/api/like/${id}`,
+        `${api}/like/${id}`,
         {},
         { withCredentials: true }
       );
@@ -77,7 +77,7 @@ const Community = () => {
   const disLikeHandler = async (id) => {
     try {
       const like = await axios.delete(
-        `http://localhost:3000/api/dislike/${id}`,
+        `${api}/dislike/${id}`,
         { withCredentials: true }
       );
       setIsLike((prev) => ({ ...prev, [id]: false }));

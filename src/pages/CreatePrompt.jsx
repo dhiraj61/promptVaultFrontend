@@ -8,12 +8,16 @@ const CreatePrompt = () => {
   const [prompt, setPrompt] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
   const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
+
+  const api = import.meta.env.VITE_API_URL
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true)
     try {
       const res = await axios.post(
-        "http://localhost:3000/api/post/createPost",
+        `${api}/post/createPost`,
         { title, prompt, isPrivate },
         {
           withCredentials: true,
@@ -30,8 +34,14 @@ const CreatePrompt = () => {
         err.response?.data || err.message
       );
       toast.error(err.response?.data?.message || "Post Creation failed");
+    } finally {
+      setLoading(false)
     }
   };
+
+  if (loading) {
+    return <p className="text-center mt-10">Creating...</p>;
+  }
 
   return (
     <form

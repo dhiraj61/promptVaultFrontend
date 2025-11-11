@@ -13,6 +13,7 @@
     "@remixicon/react": "^4.7.0",
     "@tailwindcss/vite": "^4.1.16",
     "axios": "^1.13.2",
+    "dotenv": "^17.2.3",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-pro-sidebar": "^1.1.0",
