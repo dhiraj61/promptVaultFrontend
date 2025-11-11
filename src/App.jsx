@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react"
+import { React, useEffect, useState } from "react"
 import { Routes, Route } from "react-router-dom"
-import SidebarMenu from "./components/SidebarMenu"
+const SidebarMenu = React.lazy(() => import("./components/SidebarMenu"))
 import AppRoutes from "./routes/AppRoutes"
 import axios from "axios"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import { Suspense } from "react"
+import Loading from "./components/Loading"
 
 function App() {
   const [userData, setUserData] = useState(null)
@@ -40,8 +42,10 @@ function App() {
           element={
             userData ? (
               <>
-                <SidebarMenu />
-                <AppRoutes />
+                <Suspense fallback={<Loading />}>
+                  <SidebarMenu />
+                  <AppRoutes />
+                </Suspense>
               </>
             ) : (
               <Login />
