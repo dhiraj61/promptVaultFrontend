@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react"
-import React from "react"
+import React, { Suspense, useEffect, useState } from "react"
 import { Routes, Route } from "react-router-dom"
 const SidebarMenu = React.lazy(() => import("./components/SidebarMenu"))
 import AppRoutes from "./routes/AppRoutes"
 import axios from "axios"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
-import { Suspense } from "react"
 import Loading from "./components/Loading"
 
 
 function App() {
   const [userData, setUserData] = useState(null)
-  const [loading, setLoading] = useState(null)
+  const [loading, setLoading] = useState(true)
   const api = import.meta.env.VITE_API_URL
 
 
@@ -43,12 +41,10 @@ function App() {
           path="/*"
           element={
             userData ? (
-              <>
-                <Suspense fallback={<Loading />}>
-                  <SidebarMenu />
-                  <AppRoutes />
-                </Suspense>
-              </>
+              <Suspense fallback={<Loading />}>
+                <SidebarMenu />
+                <AppRoutes />
+              </Suspense>
             ) : (
               <Login />
             )

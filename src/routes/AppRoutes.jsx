@@ -1,11 +1,10 @@
+import React, { Suspense } from 'react'
 import { Route, Routes } from 'react-router-dom'
-import React from 'react'
 const Community = React.lazy(() => import('../pages/Community'))
 const Profile = React.lazy(() => import('../pages/Profile'))
 const SinglePrompt = React.lazy(() => import('../pages/SinglePrompt'))
 const CreatePrompt = React.lazy(() => import('../pages/CreatePrompt'))
 const LikedPrompt = React.lazy(() => import('../pages/LikedPrompt'))
-import { Suspense } from 'react'
 import Loading from '../components/Loading'
 
 const AppRoutes = () => {
