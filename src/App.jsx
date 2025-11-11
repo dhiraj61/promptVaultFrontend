@@ -9,10 +9,12 @@ import Register from "./pages/Register"
 function App() {
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(null)
+  const api = import.meta.env.VITE_API_URL
+
 
   async function fetchData() {
     try {
-      const res = await axios.get('http://localhost:3000/api/post/userPrompt', { withCredentials: true })
+      const res = await axios.get(`${api}/api/post/userPrompt`, { withCredentials: true })
       setUserData(res.data.data)
     } catch (error) {
       console.log('User Not logged in', error)

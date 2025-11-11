@@ -1,6 +1,4 @@
 import { Route, Routes } from 'react-router-dom'
-import Login from '../pages/Login'
-import Register from '../pages/Register'
 import Community from '../pages/Community'
 import Profile from '../pages/Profile'
 import SinglePrompt from '../pages/SinglePrompt'
