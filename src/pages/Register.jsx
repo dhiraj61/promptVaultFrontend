@@ -32,7 +32,7 @@ const Register = () => {
       if (avatar) formData.append("avatar", avatar);
 
       const res = await axios.post(
-        `${api}/auth/register`,
+        `${api}/api/auth/register`,
         formData,
         {
           withCredentials: true,

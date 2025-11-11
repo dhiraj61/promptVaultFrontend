@@ -17,7 +17,7 @@ const CreatePrompt = () => {
     setLoading(true)
     try {
       const res = await axios.post(
-        `${api}/post/createPost`,
+        `${api}/api/post/createPost`,
         { title, prompt, isPrivate },
         {
           withCredentials: true,

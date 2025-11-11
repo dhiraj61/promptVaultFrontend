@@ -27,7 +27,7 @@ const SinglePrompt = () => {
   const fetchPrompt = async () => {
     try {
       const res = await axios.get(
-        `${api}/post/singlePrompt/${id}`,
+        `${api}/api/post/singlePrompt/${id}`,
         {
           withCredentials: true,
         }
@@ -45,7 +45,7 @@ const SinglePrompt = () => {
     setLoading(true)
     try {
       const res = await axios.patch(
-        `${api}/post/updatePrompt/${id}`,
+        `${api}/api/post/updatePrompt/${id}`,
         { title, prompt, isPrivate },
         {
           withCredentials: true,
@@ -75,7 +75,7 @@ const SinglePrompt = () => {
     try {
       setLoading(true)
       const deleted = await axios.delete(
-        `${api}/post/deletePrompt/${id}`,
+        `${api}/api/post/deletePrompt/${id}`,
         { withCredentials: true }
       );
       if (deleted) {

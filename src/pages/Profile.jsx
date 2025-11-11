@@ -19,11 +19,11 @@ const Profile = () => {
   async function fetchData() {
     try {
       const res = await axios.get(
-        `${api}/post/userPrompt`,
+        `${api}/api/post/userPrompt`,
         { withCredentials: true }
       );
       const totallike = await axios.get(
-        `${api}/totalLike`,
+        `${api}/api/totalLike`,
         { withCredentials: true }
       );
       const allPrompts = res.data.data;
@@ -31,12 +31,12 @@ const Profile = () => {
       const promptLike = {};
       for (const p of allPrompts) {
         const likesRes = await axios.get(
-          `${api}/fetchLike/${p._id}`,
+          `${api}/api/fetchLike/${p._id}`,
           { withCredentials: true }
         );
         likeResult[p._id] = likesRes.data.like;
         const promptLikeCount = await axios.get(
-          `${api}/promptLike/${p._id}`,
+          `${api}/api/promptLike/${p._id}`,
           { withCredentials: true }
         );
         promptLike[p._id] = promptLikeCount.data.likeCount;
@@ -66,7 +66,7 @@ const Profile = () => {
   const likeHandler = async (id) => {
     try {
       const like = await axios.post(
-        `${api}/like/${id}`,
+        `${api}/api/like/${id}`,
         {},
         { withCredentials: true }
       );
@@ -85,7 +85,7 @@ const Profile = () => {
   const disLikeHandler = async (id) => {
     try {
       const like = await axios.delete(
-        `${api}/dislike/${id}`,
+        `${api}/api/dislike/${id}`,
         { withCredentials: true }
       );
       setIsLike((prev) => ({ ...prev, [id]: false }));

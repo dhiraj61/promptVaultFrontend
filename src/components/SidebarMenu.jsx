@@ -15,7 +15,7 @@ const SidebarMenu = () => {
     }, [darkMode]);
 
     const logoutHandler = async () => {
-        const logout = await axios.post(`${api}/auth/logout`, {}, { withCredentials: true })
+        const logout = await axios.post(`${api}/api/auth/logout`, {}, { withCredentials: true })
         if (logout) {
             window.location.href = '/login'
         }
