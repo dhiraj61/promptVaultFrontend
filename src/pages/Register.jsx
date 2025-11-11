@@ -40,7 +40,7 @@ const Register = () => {
 
       if (res.status === 201 || res.status === 200) {
         toast.success("Registered successfully!");
-        window.location.href = "/profile";
+        navigate("/login")
       }
     } catch (err) {
       console.error("Registration failed:", err.response?.data || err.message);
@@ -63,6 +63,7 @@ const Register = () => {
         type="file"
         className="w-full h-16 border-b outline-0 p-4"
         onChange={handleFileChange}
+        required
       />
 
       <input
@@ -71,6 +72,7 @@ const Register = () => {
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="John Doe"
+        required
       />
 
       <input
@@ -79,6 +81,7 @@ const Register = () => {
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="johndoe@gmail.com"
+        required
       />
 
       <input
@@ -87,6 +90,7 @@ const Register = () => {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="******"
+        required
       />
 
       <button className="w-1/2 p-4 rounded-2xl shadow-2xl text-2xl active:scale-95">

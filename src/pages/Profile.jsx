@@ -14,49 +14,51 @@ const Profile = () => {
   const [likeCount, setLikeCount] = useState({});
   const navigate = useNavigate();
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await axios.get(
-          "http://localhost:3000/api/post/userPrompt",
+  async function fetchData() {
+    try {
+      const res = await axios.get(
+        "http://localhost:3000/api/post/userPrompt",
+        { withCredentials: true }
+      );
+      const totallike = await axios.get(
+        "http://localhost:3000/api/totalLike",
+        { withCredentials: true }
+      );
+      const allPrompts = res.data.data;
+      const likeResult = {};
+      const promptLike = {};
+      for (const p of allPrompts) {
+        const likesRes = await axios.get(
+          `http://localhost:3000/api/fetchLike/${p._id}`,
           { withCredentials: true }
         );
-        const totallike = await axios.get(
-          "http://localhost:3000/api/totalLike",
+        likeResult[p._id] = likesRes.data.like;
+        const promptLikeCount = await axios.get(
+          `http://localhost:3000/api/promptLike/${p._id}`,
           { withCredentials: true }
         );
-        const allPrompts = res.data.data;
-        const likeResult = {};
-        const promptLike = {};
-        for (const p of allPrompts) {
-          const likesRes = await axios.get(
-            `http://localhost:3000/api/fetchLike/${p._id}`,
-            { withCredentials: true }
-          );
-          likeResult[p._id] = likesRes.data.like;
-          const promptLikeCount = await axios.get(
-            `http://localhost:3000/api/promptLike/${p._id}`,
-            { withCredentials: true }
-          );
-          promptLike[p._id] = promptLikeCount.data.likeCount;
-        }
-        setPrompt(res.data.data || []);
-        setUser(res.data.user);
-        setLikes(totallike.data.likeCount);
-        setIsLike(likeResult);
-        setLikeCount(promptLike);
-      } catch (error) {
-        toast.error("404 Not Found", error);
-        setPrompt([]);
-      } finally {
-        setLoading(false);
+        promptLike[p._id] = promptLikeCount.data.likeCount;
       }
+      setPrompt(res.data.data || []);
+      setUser(res.data.user);
+      setLikes(totallike.data.likeCount);
+      setIsLike(likeResult);
+      setLikeCount(promptLike);
+    } catch (error) {
+      toast.error("404 Not Found", error);
+      setPrompt([]);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
+    setLoading(true);
     fetchData();
   }, []);
 
   if (loading) {
-    return <p className="text-center mt-10">Checking session...</p>;
+    return <p className="text-center mt-10">Loading...</p>;
   }
 
   const likeHandler = async (id) => {
@@ -100,8 +102,8 @@ const Profile = () => {
   };
 
   return (
-    <div className="w-full h-full p-4 flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
-      <div className="w-full bg-gray-50 dark:bg-gray-900 flex flex-row p-2 gap-4 shadow dark:shadow-white rounded-2xl shrink-0">
+    <div className="w-full h-full p-4 sm:px-35 md:px-50 lg:px-80 xl:px-120 2xl:px-250 flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
+      <div className="w-full bg-gray-50 dark:bg-gray-900 flex flex-row px-8 gap-4 justify-center">
         <img
           src={user?.avatar}
           alt="avatar"

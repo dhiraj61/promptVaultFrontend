@@ -1,11 +1,13 @@
 import axios from "axios";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const CreatePrompt = () => {
   const [title, setTitle] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +22,7 @@ const CreatePrompt = () => {
 
       if (res.status === 201 || res.status === 200) {
         toast.success("Prompt Created successfully!");
-        window.location.href = "/profile";
+        navigate('/profile')
       }
     } catch (err) {
       console.error(

@@ -1,14 +1,16 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const SinglePrompt = () => {
   const [title, setTitle] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
+  const [loading, setLoading] = useState(false)
   const { id } = useParams();
   const promptData = location.state?.prompt;
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (promptData) {
@@ -38,6 +40,7 @@ const SinglePrompt = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true)
     try {
       const res = await axios.patch(
         `http://localhost:3000/api/post/updatePrompt/${id}`,
@@ -47,9 +50,9 @@ const SinglePrompt = () => {
         }
       );
 
-      if (res.status === 201 || res.status === 200) {
+      if (res) {
         toast.success("Prompt Updated successfully!");
-        window.location.href = "/profile";
+        navigate('/profile')
       }
     } catch (err) {
       console.error(
@@ -57,8 +60,14 @@ const SinglePrompt = () => {
         err.response?.data || err.message
       );
       toast.error(err.response?.data?.message || "Post Updation failed");
+    } finally {
+      setLoading(false)
     }
   };
+
+  if (loading) {
+    return <p className="text-center mt-10">Updating...</p>;
+  }
 
   const deleteHandler = async () => {
     const deleted = await axios.delete(
@@ -67,7 +76,7 @@ const SinglePrompt = () => {
     );
     if (deleted) {
       toast.error("Deleted Successfully");
-      window.location.href = "/profile";
+      navigate('/profile')
     }
   };
 
@@ -82,6 +91,7 @@ const SinglePrompt = () => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title"
+        required
       />
 
       <textarea
@@ -92,6 +102,7 @@ const SinglePrompt = () => {
         wrap="hard"
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Prompt"
+        required
       ></textarea>
 
       <div className="w-full h-7 flex flex-row gap-4 items-baseline">

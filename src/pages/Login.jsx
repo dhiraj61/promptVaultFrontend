@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -16,14 +17,13 @@ const Login = () => {
       );
 
       if (res) {
-        window.location.href = "/profile";
+        window.location.href = '/profile'
       }
     } catch (err) {
       console.error("Login failed:", err.response?.data || err.message);
     }
   };
 
-  const navigate = useNavigate();
   return (
     <form
       onSubmit={handleSubmit}
@@ -37,6 +37,7 @@ const Login = () => {
           setEmail(e.target.value);
         }}
         placeholder="johndoe@gmail.com"
+        required
       />
       <input
         className="w-full h-16 border-b outline-0 p-4 "
@@ -46,6 +47,7 @@ const Login = () => {
           setPassword(e.target.value);
         }}
         placeholder="******"
+        required
       />
       <button className="w-1/2 p-4 rounded-2xl shadow-2xl text-2xl active:scale-95">
         Login

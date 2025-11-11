@@ -71,7 +71,7 @@ const LikedPrompt = () => {
   };
 
   return (
-    <div className="w-full h-full p-4 flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
+    <div className="w-full h-full p-4 sm:px-35 md:px-50 lg:px-80 xl:px-120 2xl:px-250 flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
       <div className="w-full h-[85vh] flex flex-col  gap-1 items-center overflow-hidden">
         <h1 className="text-xl font-medium ">Liked Prompts</h1>
         <hr className="w-full" />
