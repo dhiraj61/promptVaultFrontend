@@ -1,4 +1,5 @@
-import { React, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
+import React from "react"
 import { Routes, Route } from "react-router-dom"
 const SidebarMenu = React.lazy(() => import("./components/SidebarMenu"))
 import AppRoutes from "./routes/AppRoutes"
@@ -7,6 +8,7 @@ import Login from "./pages/Login"
 import Register from "./pages/Register"
 import { Suspense } from "react"
 import Loading from "./components/Loading"
+
 
 function App() {
   const [userData, setUserData] = useState(null)
