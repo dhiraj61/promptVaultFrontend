@@ -3,6 +3,7 @@ import axios from "axios";
 import { RiHeartFill, RiHeartLine } from "@remixicon/react";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import Loading from "../components/Loading";
 
 const Profile = () => {
   const [prompt, setPrompt] = useState([]);
@@ -13,98 +14,97 @@ const Profile = () => {
   const [isLike, setIsLike] = useState({});
   const [likeCount, setLikeCount] = useState({});
   const navigate = useNavigate();
-  const api = import.meta.env.VITE_API_URL
+  const api = import.meta.env.VITE_API_URL;
 
-
-  async function fetchData() {
+  const fetchData = async () => {
     try {
-      const res = await axios.get(
-        `${api}/api/post/userPrompt`,
-        { withCredentials: true }
-      );
-      const totallike = await axios.get(
-        `${api}/api/totalLike`,
-        { withCredentials: true }
-      );
+      const token = localStorage.getItem("token");
+
+      const res = await axios.get(`${api}/api/post/userPrompt`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const totallike = await axios.get(`${api}/api/totalLike`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       const allPrompts = res.data.data;
       const likeResult = {};
       const promptLike = {};
+
       for (const p of allPrompts) {
-        const likesRes = await axios.get(
-          `${api}/api/fetchLike/${p._id}`,
-          { withCredentials: true }
-        );
+        const likesRes = await axios.get(`${api}/api/fetchLike/${p._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         likeResult[p._id] = likesRes.data.like;
+
         const promptLikeCount = await axios.get(
           `${api}/api/promptLike/${p._id}`,
-          { withCredentials: true }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+
         promptLike[p._id] = promptLikeCount.data.likeCount;
       }
-      setPrompt(res.data.data || []);
+
+      setPrompt(allPrompts || []);
       setUser(res.data.user);
       setLikes(totallike.data.likeCount);
       setIsLike(likeResult);
       setLikeCount(promptLike);
     } catch (error) {
-      toast.error("404 Not Found", error);
+      toast.error("Failed to load profile data");
       setPrompt([]);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     setLoading(true);
     fetchData();
   }, []);
 
-  if (loading) {
-    return <p className="text-center mt-10">Loading...</p>;
-  }
-
   const likeHandler = async (id) => {
     try {
-      const like = await axios.post(
+      const token = localStorage.getItem("token");
+      const res = await axios.post(
         `${api}/api/like/${id}`,
         {},
-        { withCredentials: true }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       setIsLike((prev) => ({ ...prev, [id]: true }));
-      if (like.data?.likeCount !== undefined) {
-        setLikeCount((prev) => ({ ...prev, [id]: like.data.likeCount }));
-      } else {
-        setLikeCount((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
-      }
+      setLikeCount((prev) => ({
+        ...prev,
+        [id]: res.data.likeCount ?? (prev[id] || 0) + 1,
+      }));
       setLikes((prev) => prev + 1);
-    } catch (error) {
-      toast.error(error);
+    } catch {
+      toast.error("Failed to like prompt");
     }
   };
 
   const disLikeHandler = async (id) => {
     try {
-      const like = await axios.delete(
-        `${api}/api/dislike/${id}`,
-        { withCredentials: true }
-      );
+      const token = localStorage.getItem("token");
+      const res = await axios.delete(`${api}/api/dislike/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setIsLike((prev) => ({ ...prev, [id]: false }));
-      if (like.data?.likeCount !== undefined) {
-        setLikeCount((prev) => ({ ...prev, [id]: like.data.likeCount }));
-      } else {
-        setLikeCount((prev) => ({
-          ...prev,
-          [id]: Math.max((prev[id] || 1) - 1, 0),
-        }));
-      }
+      setLikeCount((prev) => ({
+        ...prev,
+        [id]: res.data.likeCount ?? Math.max((prev[id] || 1) - 1, 0),
+      }));
       setLikes((prev) => Math.max(prev - 1, 0));
-    } catch (error) {
-      toast.error(error);
+    } catch {
+      toast.error("Failed to unlike prompt");
     }
   };
 
+  if (loading) return <Loading/>
+
   return (
-    <div className="h-full w-full px-[8vw] sm:px-[18vw] md:px-[25vw] xl:px-[30vw] 2xl:px-[32vw] py-4  flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
+    <div className="h-full w-full px-[8vw] sm:px-[18vw] md:px-[25vw] xl:px-[30vw] 2xl:px-[32vw] py-4 flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
       <div className="w-full bg-gray-50 dark:bg-gray-900 flex flex-row px-8 gap-4 justify-center">
         <img
           src={user?.avatar}
@@ -125,63 +125,58 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <div className="w-full h-[78vh] flex flex-col  gap-1 items-center overflow-hidden">
-        <h1 className="text-xl font-medium ">Prompts</h1>
+
+      <div className="w-full h-[78vh] flex flex-col gap-1 items-center overflow-hidden">
+        <h1 className="text-xl font-medium">Prompts</h1>
         <hr className="w-full" />
         <div className="w-full h-[80vh] p-4 flex flex-col gap-4 overflow-y-auto">
           {prompt.length === 0 ? (
             <p className="text-center text-gray-500">No prompts yet.</p>
           ) : (
             prompt.map((prompt) => {
-              const shouldTrucate = prompt.prompt.length > 100;
+              const shouldTruncate = prompt.prompt.length > 100;
               const expanded = expandedPromptId === prompt._id;
               const displayText = expanded
                 ? prompt.prompt
-                : prompt.prompt.slice(0, 100) + (shouldTrucate ? "..." : "");
+                : prompt.prompt.slice(0, 100) +
+                (shouldTruncate ? "..." : "");
               return (
                 <div
                   key={prompt._id}
                   className="w-full flex flex-col gap-2 p-4 bg-transparent border rounded items-start cursor-pointer"
-                  onClick={() => {
+                  onClick={() =>
                     navigate(`/singleprompt/${prompt._id}`, {
                       state: { prompt },
-                    });
-                  }}
+                    })
+                  }
                 >
-                  <h1 className="text-sm font-normal ">
-                    <b>Title: </b>
-                    {prompt.title}
+                  <h1 className="text-sm font-normal">
+                    <b>Title:</b> {prompt.title}
                   </h1>
-                  <p className="text-sm font-normal ">
+                  <p className="text-sm font-normal">
                     <b>Prompt:</b> {displayText}
                   </p>
-                  {shouldTrucate && (
+                  {shouldTruncate && (
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        setExpandedPromptId(expanded ? null : prompt._id)
-                      }
-                      }
+                        setExpandedPromptId(expanded ? null : prompt._id);
+                      }}
                       className="text-blue-500 font-medium align-super"
                     >
                       {expanded ? "See less" : "See more"}
                     </button>
-                  )
-                  }
+                  )}
                   <p className="text-sm">
                     <b>Tags:</b>{" "}
-                    {prompt.tags.map((tag, indx) => {
-                      return indx + 1 + "." + " " + tag + " ";
-                    })}
+                    {prompt.tags.map((tag, index) => `${index + 1}. ${tag} `)}
                   </p>
-                  {
-                    prompt.isPrivate ? (
-                      <p className="text-sm font-bold text-red-400">Private</p>
-                    ) : (
-                      <p className="text-sm font-bold text-green-400">Public</p>
-                    )
-                  }
-                  < hr className="w-full" />
+                  {prompt.isPrivate ? (
+                    <p className="text-sm font-bold text-red-400">Private</p>
+                  ) : (
+                    <p className="text-sm font-bold text-green-400">Public</p>
+                  )}
+                  <hr className="w-full" />
                   <div className="flex flex-row items-center gap-2">
                     {isLike[prompt._id] ? (
                       <button
@@ -210,7 +205,7 @@ const Profile = () => {
           )}
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 

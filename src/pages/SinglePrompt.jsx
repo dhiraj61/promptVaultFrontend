@@ -1,18 +1,19 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
+import Loading from "../components/Loading";
 
 const SinglePrompt = () => {
   const [title, setTitle] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const { id } = useParams();
+  const location = useLocation();
   const promptData = location.state?.prompt;
-  const navigate = useNavigate()
-  const api = import.meta.env.VITE_API_URL
-
+  const navigate = useNavigate();
+  const api = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     if (promptData) {
@@ -26,71 +27,63 @@ const SinglePrompt = () => {
 
   const fetchPrompt = async () => {
     try {
-      const res = await axios.get(
-        `${api}/api/post/singlePrompt/${id}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${api}/api/post/singlePrompt/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       setTitle(res.data.prompt.title);
       setPrompt(res.data.prompt.prompt);
       setIsPrivate(res.data.prompt.isPrivate);
-    } catch (error) {
-      toast.error("Failed to load prompt", error);
+    } catch {
+      toast.error("Failed to load prompt");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const res = await axios.patch(
         `${api}/api/post/updatePrompt/${id}`,
         { title, prompt, isPrivate },
         {
-          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      if (res) {
-        toast.success("Prompt Updated successfully!");
-        navigate('/profile')
+      if (res.status === 200 || res.status === 201) {
+        toast.success("Prompt updated successfully!");
+        navigate("/profile");
       }
     } catch (err) {
-      console.error(
-        "Prompt Updation failed:",
-        err.response?.data || err.message
-      );
-      toast.error(err.response?.data?.message || "Post Updation failed");
+      toast.error(err.response?.data?.message || "Prompt update failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
-
-  if (loading) {
-    return <p className="text-center mt-10">Updating...</p>;
-  }
 
   const deleteHandler = async () => {
     try {
-      setLoading(true)
-      const deleted = await axios.delete(
-        `${api}/api/post/deletePrompt/${id}`,
-        { withCredentials: true }
-      );
-      if (deleted) {
-        toast.error("Deleted Successfully");
-        navigate('/profile')
+      setLoading(true);
+      const token = localStorage.getItem("token");
+      const res = await axios.delete(`${api}/api/post/deletePrompt/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.status === 200 || res.status === 201) {
+        toast.error("Prompt deleted successfully");
+        navigate("/profile");
       }
-    } catch (error) {
-      toast.error(error)
+    } catch {
+      toast.error("Failed to delete prompt");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
   if (loading) {
-    return <p className="text-center mt-10">Deleting...</p>;
+    return <Loading />
   }
 
   return (
@@ -132,14 +125,17 @@ const SinglePrompt = () => {
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row">
-        <button className="w-[55vw] sm:w-[24vw] lg:w-[20vw] xl:w-[18vw] 2xl:w-[12vw] p-4 rounded-2xl shadow-2xl text-xl bg-blue-400 dark:border active:scale-95">
+        <button
+          type="submit"
+          className="w-[55vw] sm:w-[24vw] lg:w-[20vw] xl:w-[18vw] 2xl:w-[12vw] p-4 rounded-2xl shadow-2xl text-xl bg-blue-400 dark:border active:scale-95"
+        >
           Update Prompt
         </button>
+
         <button
+          type="button"
           className="w-[55vw] sm:w-[24vw] lg:w-[20vw] xl:w-[18vw] 2xl:w-[12vw] p-4 rounded-2xl shadow-2xl text-xl bg-red-400 dark:border active:scale-95"
-          onClick={() => {
-            deleteHandler();
-          }}
+          onClick={deleteHandler}
         >
           Delete Prompt
         </button>

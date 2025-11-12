@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { RiHeartFill, RiHeartLine } from "@remixicon/react";
+import { RiHeartFill } from "@remixicon/react";
 import { toast } from "react-toastify";
+import Loading from "../components/Loading";
 
 const LikedPrompt = () => {
   const [prompt, setPrompt] = useState([]);
@@ -9,92 +10,94 @@ const LikedPrompt = () => {
   const [expandedPromptId, setExpandedPromptId] = useState(null);
   const [isLike, setIsLike] = useState({});
   const [likeCount, setLikeCount] = useState({});
-  const api = import.meta.env.VITE_API_URL
+  const api = import.meta.env.VITE_API_URL;
 
-
-  async function fetchData() {
+  const fetchData = async () => {
     try {
+      const token = localStorage.getItem("token");
+
       const res = await axios.get(`${api}/api/likedPrompt`, {
-        withCredentials: true,
+        headers: { Authorization: `Bearer ${token}` },
       });
+
       const allPrompts = res.data.postWithUser;
       const likeResult = {};
       const promptLike = {};
+
       for (const p of allPrompts) {
-        const likesRes = await axios.get(
-          `${api}/api/fetchLike/${p._id}`,
-          { withCredentials: true }
-        );
+        const likesRes = await axios.get(`${api}/api/fetchLike/${p._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
         likeResult[p._id] = likesRes.data.like;
+
         const promptLikeCount = await axios.get(
           `${api}/api/promptLike/${p._id}`,
-          { withCredentials: true }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
+
         promptLike[p._id] = promptLikeCount.data.likeCount;
       }
-      setPrompt(res.data.postWithUser || []);
+
+      setPrompt(allPrompts || []);
       setIsLike(likeResult);
       setLikeCount(promptLike);
     } catch (error) {
-      toast.error("404 Not Found", error);
+      toast.error("Failed to load liked prompts");
       setPrompt([]);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
-  if (loading) {
-    return <p className="text-center mt-10">Checking session...</p>;
-  }
-
   const disLikeHandler = async (id) => {
     try {
-      const like = await axios.delete(
-        `${api}/api/dislike/${id}`,
-        { withCredentials: true }
-      );
+      const token = localStorage.getItem("token");
+
+      const res = await axios.delete(`${api}/api/dislike/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       setPrompt((prev) => prev.filter((p) => p._id !== id));
       setIsLike((prev) => ({ ...prev, [id]: false }));
-      if (like.data?.likeCount !== undefined) {
-        setLikeCount((prev) => ({ ...prev, [id]: like.data.likeCount }));
-      } else {
-        setLikeCount((prev) => ({
-          ...prev,
-          [id]: Math.max((prev[id] || 1) - 1, 0),
-        }));
-      }
+      setLikeCount((prev) => ({
+        ...prev,
+        [id]: res.data.likeCount ?? Math.max((prev[id] || 1) - 1, 0),
+      }));
     } catch (error) {
-      toast.error(error);
+      toast.error("Failed to remove like");
     }
   };
 
+  if (loading) {
+    return <Loading />
+  }
+
   return (
     <div className="w-full h-full px-[8vw] sm:px-[18vw] md:px-[25vw] xl:px-[30vw] 2xl:px-[32vw] py-4 flex flex-col gap-4 items-center bg-white text-black dark:bg-gray-900 dark:text-white overflow-hidden">
-      <div className="w-full h-[85vh] flex flex-col  gap-1 items-center overflow-hidden">
-        <h1 className="text-xl font-medium ">Liked Prompts</h1>
+      <div className="w-full h-[85vh] flex flex-col gap-1 items-center overflow-hidden">
+        <h1 className="text-xl font-medium">Liked Prompts</h1>
         <hr className="w-full" />
         <div className="w-full h-[83vh] p-4 flex flex-col gap-4 overflow-y-auto">
           {prompt.length === 0 ? (
-            <p className="text-center text-gray-500">No prompts yet.</p>
+            <p className="text-center text-gray-500">No liked prompts yet.</p>
           ) : (
             prompt.map((prompt) => {
-              const shouldTrucate = prompt.prompt.length > 100;
+              const shouldTruncate = prompt.prompt.length > 100;
               const expanded = expandedPromptId === prompt._id;
               const displayText = expanded
                 ? prompt.prompt
-                : prompt.prompt.slice(0, 100) + (shouldTrucate ? "..." : "");
+                : prompt.prompt.slice(0, 100) +
+                (shouldTruncate ? "..." : "");
               const formatted = new Date(prompt.createdAt).toLocaleDateString(
                 "en-GB",
-                {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                }
+                { day: "2-digit", month: "short", year: "numeric" }
               );
+
               return (
                 <div
                   key={prompt._id}
@@ -112,14 +115,13 @@ const LikedPrompt = () => {
                     </div>
                   </div>
                   <hr className="w-full" />
-                  <h1 className="text-sm font-normal ">
-                    <b>Title: </b>
-                    {prompt.title}
+                  <h1 className="text-sm font-normal">
+                    <b>Title:</b> {prompt.title}
                   </h1>
-                  <p className="text-sm font-normal ">
+                  <p className="text-sm font-normal">
                     <b>Prompt:</b> {displayText}
                   </p>
-                  {shouldTrucate && (
+                  {shouldTruncate && (
                     <button
                       onClick={() =>
                         setExpandedPromptId(expanded ? null : prompt._id)
@@ -131,18 +133,12 @@ const LikedPrompt = () => {
                   )}
                   <p className="text-sm">
                     <b>Tags:</b>{" "}
-                    {prompt.tags.map((tag, indx) => {
-                      return indx + 1 + "." + " " + tag + " ";
-                    })}
+                    {prompt.tags.map((tag, index) => `${index + 1}. ${tag} `)}
                   </p>
                   <hr className="w-full" />
                   <div className="flex flex-row items-center gap-2">
                     {isLike[prompt._id] && (
-                      <button
-                        onClick={() => {
-                          disLikeHandler(prompt._id);
-                        }}
-                      >
+                      <button onClick={() => disLikeHandler(prompt._id)}>
                         <RiHeartFill className="text-red-400" />
                       </button>
                     )}

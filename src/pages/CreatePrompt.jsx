@@ -2,45 +2,44 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Loading from "../components/Loading";
 
 const CreatePrompt = () => {
   const [title, setTitle] = useState("");
   const [prompt, setPrompt] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
-
-  const api = import.meta.env.VITE_API_URL
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const api = import.meta.env.VITE_API_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true)
+    setLoading(true);
     try {
+      const token = localStorage.getItem("token");
       const res = await axios.post(
         `${api}/api/post/createPost`,
         { title, prompt, isPrivate },
         {
-          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
       if (res.status === 201 || res.status === 200) {
-        toast.success("Prompt Created successfully!");
-        navigate('/profile')
+        toast.success("Prompt created successfully!");
+        navigate("/profile");
       }
     } catch (err) {
-      console.error(
-        "Prompt Creation failed:",
-        err.response?.data || err.message
-      );
-      toast.error(err.response?.data?.message || "Post Creation failed");
+      toast.error(err.response?.data?.message || "Prompt creation failed");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   };
 
   if (loading) {
-    return <p className="text-center mt-10">Creating...</p>;
+    return <Loading/>
   }
 
   return (
@@ -54,6 +53,7 @@ const CreatePrompt = () => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         placeholder="Title"
+        required
       />
 
       <textarea
@@ -64,6 +64,7 @@ const CreatePrompt = () => {
         wrap="hard"
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Prompt"
+        required
       ></textarea>
 
       <div className="w-full h-7 flex flex-row gap-4 items-baseline">

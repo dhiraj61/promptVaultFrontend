@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Loading from "../components/Loading";
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -9,46 +10,43 @@ const Register = () => {
   const [name, setName] = useState("");
   const [avatar, setAvatar] = useState(null);
   const [preview, setPreview] = useState(null);
-  const api = import.meta.env.VITE_API_URL
-
-
+  const [loading, setLoading] = useState(false)
+  const api = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setAvatar(file);
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
+    if (file) setPreview(URL.createObjectURL(file));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      setLoading(true)
       const formData = new FormData();
       formData.append("name", name);
       formData.append("email", email);
       formData.append("password", password);
       if (avatar) formData.append("avatar", avatar);
 
-      const res = await axios.post(
-        `${api}/api/auth/register`,
-        formData,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const res = await axios.post(`${api}/api/auth/register`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-      if (res.status === 201 || res.status === 200) {
-        toast.success("Registered successfully!");
-        navigate("/login")
-      }
+      localStorage.setItem("token", res.data.token);
+      toast.success("Registered successfully!");
+      navigate("/login");
     } catch (err) {
-      console.error("Registration failed:", err.response?.data || err.message);
       toast.error(err.response?.data?.message || "Registration failed");
+    } finally {
+      setLoading(false)
     }
   };
+
+  if (loading) {
+    return <Loading />
+  }
 
   return (
     <form
