@@ -69,7 +69,7 @@ const Community = () => {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      setIsLike((prev) => ({ ...prev, [id]: true }));
+      setIsLike((prev) => ({ ...prev, [id]: res.data.isLiked }));
       setLikeCount((prev) => ({
         ...prev,
         [id]: res.data.likeCount ?? (prev[id] || 0) + 1,
@@ -85,7 +85,7 @@ const Community = () => {
       const res = await axios.delete(`${api}/api/dislike/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setIsLike((prev) => ({ ...prev, [id]: false }));
+      setIsLike((prev) => ({ ...prev, [id]: res.data.isLiked }));
       setLikeCount((prev) => ({
         ...prev,
         [id]: res.data.likeCount ?? Math.max((prev[id] || 1) - 1, 0),
@@ -127,12 +127,12 @@ const Community = () => {
                 >
                   <div className="flex flex-row items-center gap-2">
                     <img
-                      src={prompt.avatar}
+                      src={prompt.createdBy.avatar}
                       alt="avatar"
                       className="w-8 h-8 rounded-2xl object-cover"
                     />
                     <div className="flex flex-col">
-                      <h1>{prompt.name}</h1>
+                      <h1>{prompt.createdBy.name}</h1>
                       <h6>{formatted}</h6>
                     </div>
                   </div>
